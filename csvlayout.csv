@@ -1,0 +1,11 @@
+Sensor type:,csvlayout
+
+Aantal readings:,3
+Min value:,10.0
+Max value:,20.0
+Alert threshold:,15.0
+
+Readings
+16.39
+10.25
+12.75

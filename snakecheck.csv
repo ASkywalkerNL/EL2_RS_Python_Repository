@@ -1,8 +1,6 @@
-Sensor: testsensor
+Sensor: snakecheck
 Readings,Min_value,Max_value,Alert_threshold
 ,10.0,20.0,15.0
 16.39
 10.25
 12.75
-12.23
-17.36
