@@ -1,0 +1,19 @@
+Sensor type:,csvstats
+
+Aantal readings:,3
+Min value:,10.0
+Max value:,20.0
+Alert threshold:,15.0
+
+Readings
+16.39
+10.25
+12.75
+
+Statistics
+Mean:,13.13
+Median:,12.75
+Standard deviation:,2.521005090567385
+Minimum reading:,10.25
+Maximum reading:,16.39
+Readings above threshold:,1

@@ -1,6 +1,0 @@
-Sensor: snakecheck
-Readings,Min_value,Max_value,Alert_threshold
-,10.0,20.0,15.0
-16.39
-10.25
-12.75
