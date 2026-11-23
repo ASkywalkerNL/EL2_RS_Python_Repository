@@ -40,7 +40,7 @@ def generate_sensor_data(Numer_of_readings, Min_value, Max_value):
     Readings = [round(random.uniform(Min_value, Max_value), 2) for _ in range(Numer_of_readings)]
     return Readings
 
-def save_to_csv(Sensor_type, Readings):
+def save_to_csv(Sensor_type, Readings, Min_value=None, Max_value=None, Alert_threshold=None):
     """ Save sensor data to a CSV file.
         The CSV file is named based on the sensor type and contains the sensor readings.
     """
@@ -48,6 +48,8 @@ def save_to_csv(Sensor_type, Readings):
         writer = csv.writer(file)
         writer.writerow([f"Sensor: {Sensor_type}"])
         writer.writerow(["Readings", "Min_value", "Max_value", "Alert_threshold"])
+        if Min_value is not None or Max_value is not None or Alert_threshold is not None:
+            writer.writerow(["", Min_value, Max_value, Alert_threshold])
         for reading in Readings:
             writer.writerow([reading])
 
@@ -55,34 +57,33 @@ def plot_sensor_data(Sensor_type, Readings, Min_value, Max_value, Alert_threshol
     """ Plots a line graph of the sensor data using matplotlib.
         Saves the plot as a PNG file named based on the sensor type.
     """
-    fig = plt.subplots()
-    plt.figure(figsize=(10, 5))
-    plt.plot(Readings, marker='o', linestyle='-', color='b')
-    plt.axhline(y=Min_value, color='r', linestyle='--', label=f'Min: {Min_value}')
-    plt.axhline(y=Max_value, color='g', linestyle='--', label=f'Max: {Max_value}')
-    plt.axhline(y=Alert_threshold, color='orange', linestyle='--', label=f'Alert: {Alert_threshold}')
-    plt.xlabel('Reading Number')
-    plt.ylabel('Value')
-    plt.title(f'Sensor Data: {Sensor_type}')
+    fig, ax = plt.subplots(figsize=(10, 5))
+    ax.plot(Readings, marker='o', linestyle='-', color='b')
+    ax.axhline(y=Min_value, color='r', linestyle='--', label=f'Min: {Min_value}')
+    ax.axhline(y=Max_value, color='g', linestyle='--', label=f'Max: {Max_value}')
+    ax.axhline(y=Alert_threshold, color='orange', linestyle='--', label=f'Alert: {Alert_threshold}')
+    ax.set_xlabel('Reading Number')
+    ax.set_ylabel('Value')
+    ax.set_title(f'Sensor Data: {Sensor_type}')
     
-    plt.grid()
-    plt.legend()
+    ax.grid()
+    ax.legend()
     fig.savefig(f"{Sensor_type}_plot.png")  # Save the plot as a PNG file
     
-    plt.show()
+    plt.close(fig)
 
 def plot_histogram(Sensor_type, Readings):
     """ Plot a histogram of the sensor data using matplotlib.
         Saves the histogram as a PNG file named based on the sensor type.
     """
     n_bins = 'auto'  # Number of bins for the histogram
-    fig = plt.subplots()
-    plt.hist(Readings, bins=n_bins, color='blue', edgecolor='black', alpha=0.7)
-    plt.xlabel(f'{Sensor_type} readings')
-    plt.ylabel('Amount of readings')
-    plt.title(f'Histogram of Sensor Data: {Sensor_type}')
+    fig, ax = plt.subplots()
+    ax.hist(Readings, bins=n_bins, color='blue', edgecolor='black', alpha=0.7)
+    ax.set_xlabel(f'{Sensor_type} readings')
+    ax.set_ylabel('Amount of readings')
+    ax.set_title(f'Histogram of Sensor Data: {Sensor_type}')
     fig.savefig(f"{Sensor_type}_histogram.png")  # Save the histogram as a PNG file
-    plt.show()
+    plt.close(fig)
 
 def load_sensor_data_from_csv(Sensor_type):
     """ Load sensor data from a CSV file.
@@ -91,19 +92,15 @@ def load_sensor_data_from_csv(Sensor_type):
     Readings = []
     try:
         with open(f"{Sensor_type}.csv", "r", encoding="utf-8") as file:
-            first_line = file.readline()  # Read the first line (sensor type)
-            sensor_type_from_file = first_line.strip().split(": ")[1]  # Extract sensor type from the first line
             reader = csv.reader(file)
-            next(reader)  # Skip the first row (sensor type)
-            next(reader)  # Skip the second row (headers)
-            next(reader)  # Skip the third row (Alert_threshold)
-            Alert_threshold = float(next(reader)["Alert_threshold"])
-            
-            next(reader)  # Skip the first row (sensor type)
-            next(reader)  # Skip the second row (headers)
+            next(reader)
+            next(reader)
             for row in reader:
                 if row:  # Check if the row is not empty
-                    Readings.append(float(row[0]))  # Append the reading to the list
+                    try:
+                        Readings.append(float(row[0]))
+                    except ValueError:
+                        continue
             
     except FileNotFoundError:
         print(f"File {Sensor_type}.csv not found.")
@@ -143,4 +140,11 @@ def calculate_statistics(Sensor_type, Readings, Alert_threshold=None):
 
 if __name__ == "__main__":
     sensor_input = get_user_input()
-    print(sensor_input)
+    if sensor_input is not None:
+        Sensor_type, Number_of_readings, Min_value, Max_value, Alert_threshold = sensor_input
+        Readings = generate_sensor_data(Number_of_readings, Min_value, Max_value)
+        save_to_csv(Sensor_type, Readings, Min_value, Max_value, Alert_threshold)
+        plot_sensor_data(Sensor_type, Readings, Min_value, Max_value, Alert_threshold)
+        plot_histogram(Sensor_type, Readings)
+        calculate_statistics(Sensor_type, Readings, Alert_threshold)
+        print(f"CSV and plots saved for sensor type: {Sensor_type}")
