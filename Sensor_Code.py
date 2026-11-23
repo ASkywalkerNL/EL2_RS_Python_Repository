@@ -8,66 +8,64 @@ def get_user_input():
     """ Get user input for sensor type, number of readings, minimum value, maximum value, and alert threshold.
         Returns a tuple containing the sensor type, number of readings, minimum value, maximum value, and alert threshold.
     """
-    
-    try:
-        sensor_type = input("Enter sensor type (e.g., temperatuur, vochtigheid): ").strip()
-        if sensor_type.lower() in ("q", "quit"):
-            print("Input cancelled.")
+
+    while True:
+        try:
+            sensor_type = input("Enter sensor type (e.g., temperatuur, vochtigheid): ").strip()
+            if sensor_type.lower() in ("q", "quit"):
+                print("Input cancelled.")
+                return None
+            if not sensor_type or not sensor_type.isalpha():
+                print("Sensor type must contain letters only.")
+                continue
+
+            number_of_readings_input = input("Enter number of readings: ").strip()
+            if number_of_readings_input.lower() in ("q", "quit"):
+                print("Input cancelled.")
+                return None
+
+            min_value_input = input("Enter minimum value: ").strip()
+            if min_value_input.lower() in ("q", "quit"):
+                print("Input cancelled.")
+                return None
+
+            max_value_input = input("Enter maximum value: ").strip()
+            if max_value_input.lower() in ("q", "quit"):
+                print("Input cancelled.")
+                return None
+
+            alert_threshold_input = input("Enter alert threshold: ").strip()
+            if alert_threshold_input.lower() in ("q", "quit"):
+                print("Input cancelled.")
+                return None
+
+            number_of_readings = int(number_of_readings_input)
+            min_value = float(min_value_input)
+            max_value = float(max_value_input)
+            alert_threshold = float(alert_threshold_input)
+        except ValueError:
+            print("Error: number of readings, minimum, maximum and alert threshold must be numeric.")
+            continue
+        except (EOFError, KeyboardInterrupt):
+            print("Error: input was cancelled.")
             return None
 
-        number_of_readings_input = input("Enter number of readings: ").strip()
-        if number_of_readings_input.lower() in ("q", "quit"):
-            print("Input cancelled.")
-            return None
+        if number_of_readings <= 0:
+            print("Number of readings must be greater than 0.")
+            continue
+        if min_value >= max_value:
+            print("Minimum value must be less than maximum value.")
+            continue
+        if alert_threshold < min_value or alert_threshold > max_value:
+            print("Alert threshold must be between minimum and maximum values.")
+            continue
 
-        min_value_input = input("Enter minimum value: ").strip()
-        if min_value_input.lower() in ("q", "quit"):
-            print("Input cancelled.")
-            return None
+        numeric_values = (number_of_readings, min_value, max_value, alert_threshold)
+        if not all(math.isfinite(float(value)) for value in numeric_values):
+            print("Error: numeric values must be finite.")
+            continue
 
-        max_value_input = input("Enter maximum value: ").strip()
-        if max_value_input.lower() in ("q", "quit"):
-            print("Input cancelled.")
-            return None
-
-        alert_threshold_input = input("Enter alert threshold: ").strip()
-        if alert_threshold_input.lower() in ("q", "quit"):
-            print("Input cancelled.")
-            return None
-
-        number_of_readings = int(number_of_readings_input)
-        min_value = float(min_value_input)
-        max_value = float(max_value_input)
-        alert_threshold = float(alert_threshold_input)
-    except ValueError:
-        print("Error: number of readings, minimum, maximum and alert threshold must be numeric.")
-        return None
-    except (EOFError, KeyboardInterrupt):
-        print("Error: input was cancelled.")
-        return None
-
-    if not sensor_type or not sensor_type.isalpha():
-        print("Sensor type must contain letters only.")
-        return None
-    
-    elif number_of_readings <= 0:
-        print("Number of readings must be greater than 0.")
-        return None
-    
-    elif min_value >= max_value:
-        print("Minimum value must be less than maximum value.")
-        return None
-
-    elif alert_threshold < min_value or alert_threshold > max_value:
-        print("Alert threshold must be between minimum and maximum values.")
-        return None
-
-    numeric_values = (number_of_readings, min_value, max_value, alert_threshold)
-    if not all(math.isfinite(float(value)) for value in numeric_values):
-        print("Error: numeric values must be finite.")
-        return None
-
-    return sensor_type, number_of_readings, min_value, max_value, alert_threshold
+        return sensor_type, number_of_readings, min_value, max_value, alert_threshold
 
 def generate_sensor_data(number_of_readings, min_value, max_value):
     """ Generate random sensor data based on the number of readings, minimum value, and maximum value.
@@ -309,45 +307,49 @@ def calculate_statistics(sensor_type, readings, alert_threshold=None):
     }
 
 def main():
-    try:
-        mode = input("Choose [old] load existing CSV or [new] generate data: ").strip().lower()
-        if mode in ("q", "quit"):
-            print("Input cancelled.")
-            return
-    except (EOFError, KeyboardInterrupt):
-        print("Error: input was cancelled.")
-        return
-
-    if mode in ("old", "load", "l"):
+    while True:
         try:
-            sensor_type = input("Enter sensor type to load: ").strip()
-            if sensor_type.lower() in ("q", "quit"):
+            mode = input("Choose [old] load existing CSV or [new] generate data: ").strip().lower()
+            if mode in ("q", "quit"):
                 print("Input cancelled.")
                 return
         except (EOFError, KeyboardInterrupt):
             print("Error: input was cancelled.")
             return
 
-        readings = load_sensor_data_from_csv(sensor_type)
-        settings = get_csv_settings(sensor_type)
-        if not readings:
-            return
+        if mode in ("old", "load", "l"):
+            while True:
+                try:
+                    sensor_type = input("Enter sensor type to load: ").strip()
+                    if sensor_type.lower() in ("q", "quit"):
+                        print("Input cancelled.")
+                        return
+                except (EOFError, KeyboardInterrupt):
+                    print("Error: input was cancelled.")
+                    return
 
-        number_of_readings = settings["number_of_readings"] or len(readings)
-        min_value = settings["min_value"]
-        max_value = settings["max_value"]
-        alert_threshold = settings["alert_threshold"]
+                readings = load_sensor_data_from_csv(sensor_type)
+                if readings:
+                    break
+                print("Try another sensor type or type 'q'/'quit' to cancel.")
 
-    elif mode in ("new", "generate", "n"):
-        sensor_input = get_user_input()
-        if sensor_input is None:
-            return
+            settings = get_csv_settings(sensor_type)
+            number_of_readings = settings["number_of_readings"] or len(readings)
+            min_value = settings["min_value"]
+            max_value = settings["max_value"]
+            alert_threshold = settings["alert_threshold"]
+            break
 
-        sensor_type, number_of_readings, min_value, max_value, alert_threshold = sensor_input
-        readings = generate_sensor_data(number_of_readings, min_value, max_value)
-    else:
+        if mode in ("new", "generate", "n"):
+            sensor_input = get_user_input()
+            if sensor_input is None:
+                return
+
+            sensor_type, number_of_readings, min_value, max_value, alert_threshold = sensor_input
+            readings = generate_sensor_data(number_of_readings, min_value, max_value)
+            break
+
         print("Error: choose 'old' or 'new'.")
-        return
 
     if not readings:
         return

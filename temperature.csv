@@ -1,0 +1,39 @@
+Sensor type:,temperature
+
+Aantal readings:,22
+Min value:,4.0
+Max value:,19.0
+Alert threshold:,15.0
+
+Readings
+Sample number:,Reading
+1,13.59
+2,4.38
+3,8.13
+4,7.35
+5,15.05
+6,14.15
+7,17.38
+8,5.3
+9,10.33
+10,4.45
+11,7.28
+12,11.58
+13,4.4
+14,6.98
+15,13.75
+16,12.17
+17,7.31
+18,12.84
+19,16.14
+20,4.1
+21,16.09
+22,14.47
+
+Statistics
+Mean:,10.328181818181818
+Median:,10.955
+Standard deviation:,4.3528471731036795
+Minimum reading:,4.1
+Maximum reading:,17.38
+Readings above threshold:,4
